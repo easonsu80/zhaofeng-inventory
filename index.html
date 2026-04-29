@@ -3,183 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📦 庫存管理 (同步至 Google Sheets)</title>
+    <title>📦 兆豐電子料件雲端庫存系統</title>
+    
+    <link rel="icon" type="image/x-icon" href="Logo_new.ico" />
+
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #f0f2f5; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            margin: 0; 
-        }
-        .container { 
-            width: 100%; 
-            max-width: 600px; 
-            background: white; 
-            border-radius: 12px; 
-            padding: 25px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-            overflow: hidden;
-        }
-        h2 { margin-top: 0; color: #333; text-align: center; }
-        .status-bar { font-size: 12px; color: #666; margin-bottom: 15px; text-align: right; }
-        .input-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 20px; 
-            width: 100%;
-        }
-        input { 
-            padding: 12px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            min-width: 0; 
-            width: 100%;
-            flex: 2; 
-            outline: none; 
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: #0078d4; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; margin: 0; }
+        .container { width: 100%; max-width: 600px; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        /* 3. 新增 Logo 樣式 */
+        .header-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        /* 控制 Logo 圖片的大小，如果覺得太大或太小可以改這裡的 height */
+        .header-logo { height: 45px; width: auto; border-radius: 4px; }
+        h2 { margin: 0; font-size: 22px; color: #333; letter-spacing: 1px; }
+
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; min-width: 0; width: 100%; flex: 2; outline: none; }
         input[type="number"] { flex: 1; }
-        button { 
-            background: #0078d4; 
-            color: white; 
-            border: none; 
-            padding: 14px 20px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 16px; 
-            transition: 0.2s; 
-        }
-        button:active { transform: scale(0.98); background: #005a9e; }
-        button:disabled { background: #999; cursor: not-allowed; }
-        .sync-status { 
-            margin-top: 15px; 
-            font-size: 14px; 
-            text-align: center; 
-            height: 20px; 
-            font-weight: bold; 
-        }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
-        th, td { 
-            padding: 12px; 
-            text-align: left; 
-            border-bottom: 1px solid #eee; 
-            word-wrap: break-word;
-        }
-        th { background: #f8f9fa; color: #555; }
-        .success { color: #28a745; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        button { border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; }
+        .btn-primary { background: #0078d4; color: white; flex: 2; }
+        .btn-search { background: #f3f2f1; color: #333; flex: 1; border: 1px solid #ccc; }
+        .sync-status { margin: 10px 0; font-size: 14px; text-align: center; font-weight: bold; }
+        #selectorBox { display: none; background: #fff9db; border: 2px solid #fab005; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        #selectorTitle { font-weight: bold; color: #e67e22; }
+        .select-item { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-top: 8px; cursor: pointer; }
+        .select-item:hover { border-color: #0078d4; background: #f0f7ff; }
         .error { color: #dc3545; }
-        .loading { color: #0078d4; }
+        .success { color: #28a745; }
+        .warning { color: #e67e22; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📦 庫存同步系統</h2>
-        <div class="status-bar" id="lastSync">尚未同步</div>
-        
-        <div class="input-group">
-            <input type="text" id="itemName" placeholder="物品名稱 (例如：pcb)">
-            <input type="number" id="itemQty" placeholder="數量(沒填=1)" min="1">
+        <div class="header-container">
+            <img src="Logo_Big.JPG" alt="ZHAO FENG Logo" class="header-logo">
+            <h2>兆豐電子料件雲端庫存</h2>
         </div>
-        <button id="submitBtn" onclick="handleAddItem()">新增並同步</button>
-        <div id="syncMsg" class="sync-status"></div>
 
-        <table id="localList">
-            <thead>
-                <tr>
-                    <th width="70%">最新新增項目</th>
-                    <th width="30%">數量</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
+        <div class="input-group">
+            <input type="text" id="itemName" placeholder="代碼/品號/品名">
+            <input type="number" id="itemQty" value="1">
+        </div>
+        <div class="btn-group">
+            <button class="btn-search" onclick="handleAction('search')">🔍 查詢庫存</button>
+            <button class="btn-primary" onclick="handleAction('update')">✍️ 寫入入庫</button>
+        </div>
+        <div id="status" class="sync-status"></div>
+        
+        <div id="selectorBox">
+            <div id="selectorTitle">請選擇項目：</div>
+            <div id="selectList"></div>
+        </div>
+
+        <table style="width:100%; margin-top:20px; border-collapse: collapse;">
+            <thead style="background:#f8f9fa"><tr><th style="padding:10px; text-align:left">最近寫入項目</th></tr></thead>
+            <tbody id="history"></tbody>
         </table>
     </div>
 
     <script>
-        // 這裡已經保留了你原本的 API 網址
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbxW04FsZJILpoAOSRo-LqXM4UL1uWwd8o6ydwBEaTJLFovbQUf6n9iBAMZIzj3tYAkL/exec";
+        // 已經幫你放入正確的 API 網址
+        const API_URL = "https://script.google.com/macros/s/AKfycbxW04FsZJILpoAOSRo-LqXM4UL1uWwd8o6ydwBEaTJLFovbQUf6n9iBAMZIzj3tYAkL/exec"; 
 
-        let inventory = JSON.parse(localStorage.getItem('cloudInv')) || [];
-        renderList();
-
-        document.getElementById('itemName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleAddItem();
-        });
-        document.getElementById('itemQty').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleAddItem();
-        });
-
-        async function handleAddItem() {
+        async function handleAction(action, targetRow = null) {
             const nameInput = document.getElementById('itemName');
-            const qtyInput = document.getElementById('itemQty');
-            const btn = document.getElementById('submitBtn');
-            const msgDiv = document.getElementById('syncMsg');
-            
             const name = nameInput.value.trim();
-            // 💡 智慧判斷：如果框框是空的，就自動把數量當成 1
-            const qty = qtyInput.value === '' ? 1 : parseInt(qtyInput.value);
-
-            if (!name || isNaN(qty) || qty <= 0) {
-                alert("請輸入正確的物品名稱與數量！");
-                nameInput.focus();
-                return;
-            }
-
-            // 1. 本地端先更新畫面
-            inventory.push({ name, qty });
-            localStorage.setItem('cloudInv', JSON.stringify(inventory));
-            renderList();
+            const qty = document.getElementById('itemQty').value;
+            const status = document.getElementById('status');
+            const selector = document.getElementById('selectorBox');
             
-            // 🚀 【重點修改】一按下按鈕，立刻把兩個輸入框清空成「完全空白」！
-            // 讓你不用等雲端轉圈圈，就能馬上準備輸入下一個零件。
-            nameInput.value = "";
-            qtyInput.value = "";
-            nameInput.focus();
+            if (!name) return alert("請輸入要查詢或寫入的物品名稱！");
             
-            // 2. 準備雲端同步
-            msgDiv.innerText = "⏳ 正在傳送資料至 Google Sheets...";
-            msgDiv.className = "sync-status loading";
-            btn.disabled = true;
+            status.innerText = "⏳ 處理中...";
+            status.className = "sync-status";
+            selector.style.display = "none";
 
             try {
-                await fetch(CLOUD_API_URL, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ name: name, qty: qty })
+                    body: JSON.stringify({ action, name, keyword: name, qty, targetRow })
                 });
+                const res = await response.json();
 
-                msgDiv.innerText = "✅ 同步成功！";
-                msgDiv.className = "sync-status success";
-                document.getElementById('lastSync').innerText = "最後同步: " + new Date().toLocaleTimeString();
-                
-            } catch (err) {
-                msgDiv.innerText = "❌ 同步失敗 (請檢查網路連線)";
-                msgDiv.className = "sync-status error";
-                console.error("錯誤:", err);
-            } finally {
-                btn.disabled = false;
+                if (res.status === "duplicate") {
+                    status.innerText = "⚠️ 偵測到多筆相符項目，請從下方選擇正確寫入目標：";
+                    status.className = "sync-status warning";
+                    showSelector(res.data, action);
+                } else if (res.status === "success") {
+                    if (action === 'search') {
+                        if (res.data.length === 0) {
+                            status.innerText = "❌ 查無此品號或代碼";
+                            status.className = "sync-status error";
+                        } else {
+                            status.innerText = `✅ 找到 ${res.data.length} 筆資料：`;
+                            status.className = "sync-status success";
+                            showSelector(res.data, 'search');
+                        }
+                    } else {
+                        status.innerText = "✅ 寫入成功！";
+                        status.className = "sync-status success";
+                        addHistory(name, qty);
+                        nameInput.value = "";
+                        nameInput.focus();
+                    }
+                } else {
+                    status.innerText = "❌ " + (res.message || "發生錯誤");
+                    status.className = "sync-status error";
+                }
+            } catch (e) { 
+                status.innerText = "❌ 連線失敗，請檢查網路及 API 設定"; 
+                status.className = "sync-status error";
             }
         }
 
-        function renderList() {
-            const tbody = document.querySelector('#localList tbody');
-            if (inventory.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#aaa; padding: 20px;">目前沒有資料</td></tr>';
-                return;
-            }
-            tbody.innerHTML = inventory.slice(-5).reverse().map(item => `
-                <tr>
-                    <td><strong>${item.name}</strong></td>
-                    <td>${item.qty}</td>
-                </tr>
+        function showSelector(data, action) {
+            const list = document.getElementById('selectList');
+            const box = document.getElementById('selectorBox');
+            const title = document.getElementById('selectorTitle');
+            
+            title.innerText = (action === 'search') ? "🔍 查詢結果清單：" : "⚠️ 偵測到重複品項，請點擊要寫入的項目：";
+            
+            list.innerHTML = data.map(item => `
+                <div class="select-item" onclick="${action === 'update' ? `handleAction('update', ${item.row})` : ''}">
+                    <div style="font-weight:bold; color:#0078d4">代碼: ${item.code} | ${item.partNo}</div>
+                    <div style="font-size:13px; color:#666;">${item.partName}</div>
+                    <div style="color:#e91e63">目前庫存/餘料: ${item.stock}</div>
+                    ${action === 'update' ? `<div style="font-size:12px; color:#aaa; text-align:right; margin-top:5px;">[ 點擊寫入此項 ]</div>` : ''}
+                </div>
             `).join('');
+            box.style.display = "block";
+        }
+
+        function addHistory(n, q) {
+            const h = document.getElementById('history');
+            const row = h.insertRow(0);
+            row.innerHTML = `<td style="padding:10px; border-bottom:1px solid #eee">${n} (寫入數量: ${q})</td>`;
         }
     </script>
 </body>
