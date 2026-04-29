@@ -44,7 +44,7 @@
 
         <div class="input-group">
             <input type="text" id="itemName" placeholder="代碼/品號/品名">
-            <input type="number" id="itemQty" value="1">
+            <input type="number" id="itemQty" value="0">
         </div>
         <div class="btn-group">
             <button class="btn-search" onclick="handleAction('search')">🔍 查詢庫存</button>
@@ -70,7 +70,8 @@
         async function handleAction(action, targetRow = null) {
             const nameInput = document.getElementById('itemName');
             const name = nameInput.value.trim();
-            const qty = document.getElementById('itemQty').value;
+            const qtyInput = document.getElementById('itemQty'); // 新增：為了方便控制數量輸入框
+            const qty = qtyInput.value;
             const status = document.getElementById('status');
             const selector = document.getElementById('selectorBox');
             
@@ -107,6 +108,7 @@
                         status.className = "sync-status success";
                         addHistory(name, qty);
                         nameInput.value = "";
+                        qtyInput.value = "0"; // 修改：寫入成功後，將數量強制歸零
                         nameInput.focus();
                     }
                 } else {
