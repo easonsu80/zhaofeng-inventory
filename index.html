@@ -4,66 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>📦 兆豐電子料件雲端庫存系統</title>
-    
     <link rel="icon" type="image/x-icon" href="Logo_new.ico" />
-
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; margin: 0; }
-        .container { width: 100%; max-width: 600px; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        
-        .header-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; }
-        .header-logo { height: 45px; width: auto; border-radius: 4px; }
-        h2 { margin: 0; font-size: 22px; color: #333; letter-spacing: 1px; }
+        :root {
+            --primary-color: #0078d4;
+            --primary-hover: #005a9e;
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-color: #dee2e6;
+            --success: #28a745;
+            --error: #dc3545;
+            --warning: #f0ad4e;
+        }
 
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; min-width: 0; width: 100%; flex: 2; outline: none; }
-        input[type="number"] { flex: 0.8; }
-        /* 授權碼輸入框樣式 */
-        input[type="password"] { flex: 0.8; background-color: #fff9db; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
-        button { border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; }
-        .btn-primary { background: #0078d4; color: white; flex: 2; }
-        .btn-search { background: #f3f2f1; color: #333; flex: 1; border: 1px solid #ccc; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px 15px;
+            line-height: 1.5;
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 500px; 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 30px 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+        }
+
+        /* Header 設計 */
+        .header { text-align: center; margin-bottom: 30px; }
+        .header-logo { height: 50px; width: auto; margin-bottom: 12px; border-radius: 8px; }
+        .header h2 { margin: 0; font-size: 20px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.5px; }
+
+        /* 輸入區設計 */
+        .form-group { margin-bottom: 20px; }
+        .input-label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 6px; font-weight: 500; }
         
-        .sync-status { margin: 10px 0; font-size: 14px; text-align: center; font-weight: bold; }
-        #selectorBox { display: none; background: #fff9db; border: 2px solid #fab005; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        #selectorTitle { font-weight: bold; color: #e67e22; }
-        .select-item { background: white; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-top: 8px; cursor: pointer; }
-        .select-item:hover { border-color: #0078d4; background: #f0f7ff; }
-        .error { color: #dc3545; }
-        .success { color: #28a745; }
-        .warning { color: #e67e22; }
+        .main-input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 16px; outline: none; transition: all 0.2s; background: #fafafa; }
+        .main-input:focus { border-color: var(--primary-color); background: #fff; box-shadow: 0 0 0 3px rgba(0,120,212,0.1); }
+
+        .sub-group { display: flex; gap: 12px; }
+        .sub-group > div { flex: 1; }
+
+        /* 按鈕設計 */
+        .btn-container { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+        button { 
+            display: flex; align-items: center; justify-content: center;
+            border: none; padding: 15px; border-radius: 10px; font-weight: 600; 
+            cursor: pointer; font-size: 16px; transition: all 0.2s; width: 100%;
+        }
+        
+        .btn-primary { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(0,120,212,0.2); }
+        .btn-primary:active { transform: scale(0.98); background: var(--primary-hover); }
+
+        .btn-search { background: #fff; color: #444; border: 1.5px solid var(--border-color); }
+        .btn-search:active { background: #f8f9fa; border-color: #bbb; }
+
+        /* 狀態與選擇器 */
+        .sync-status { margin: 15px 0; font-size: 14px; text-align: center; font-weight: 600; min-height: 21px; padding: 10px; border-radius: 8px; }
+        .status-empty { background: transparent; }
+        .status-success { color: var(--success); background: rgba(40,167,69,0.08); }
+        .status-error { color: var(--error); background: rgba(220,53,69,0.08); }
+        .status-warning { color: var(--warning); background: rgba(240,173,78,0.08); }
+
+        #selectorBox { 
+            display: none; background: #fffdf5; border: 1.5px solid #ffeeba; 
+            border-radius: 12px; padding: 15px; margin: 20px 0; 
+        }
+        #selectorTitle { font-size: 14px; font-weight: 700; color: #856404; margin-bottom: 10px; border-bottom: 1px solid #ffeeba; padding-bottom: 5px; }
+        
+        .select-item { 
+            background: white; padding: 12px; border: 1.2px solid #e9ecef; 
+            border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .select-item:hover { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .select-item:last-child { margin-bottom: 0; }
+
+        /* 歷史紀錄 */
+        .history-section { margin-top: 35px; border-top: 1.5px solid #eee; padding-top: 20px; }
+        .history-title { font-size: 14px; color: var(--text-sub); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+        
+        .history-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+        .history-name { color: #444; font-weight: 500; }
+        .history-qty { color: var(--primary-color); font-weight: 700; }
+
+        /* 隱藏密碼強度提示 */
+        input[type="password"] { letter-spacing: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header-container">
+        <div class="header">
             <img src="Logo_Big.JPG" alt="ZHAO FENG Logo" class="header-logo">
-            <h2>兆豐電子料件雲端庫存</h2>
+            <h2>料件雲端庫存系統</h2>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="itemName" placeholder="代碼/品號/品名">
-            <input type="number" id="itemQty" value="0">
-            <input type="password" id="pinCode" placeholder="授權碼">
+        <div class="form-group">
+            <span class="input-label">查詢與更新目標</span>
+            <input type="text" id="itemName" class="main-input" placeholder="輸入 代碼 / 品號 / 品名" autocomplete="off">
         </div>
-        <div class="btn-group">
-            <button class="btn-search" onclick="handleAction('search')">🔍 查詢庫存</button>
-            <button class="btn-primary" onclick="handleAction('update')">✍️ 寫入入庫</button>
+
+        <div class="sub-group">
+            <div class="form-group">
+                <span class="input-label">入庫數量</span>
+                <input type="number" id="itemQty" class="main-input" value="0">
+            </div>
+            <div class="form-group">
+                <span class="input-label">授權碼</span>
+                <input type="password" id="pinCode" class="main-input" placeholder="PIN">
+            </div>
         </div>
-        <div id="status" class="sync-status"></div>
+
+        <div class="btn-container">
+            <button class="btn-primary" onclick="handleAction('update')">✍️ 確認寫入入庫</button>
+            <button class="btn-search" onclick="handleAction('search')">🔍 查詢目前庫存</button>
+        </div>
+
+        <div id="status" class="sync-status status-empty"></div>
         
         <div id="selectorBox">
-            <div id="selectorTitle">請選擇項目：</div>
+            <div id="selectorTitle">請選擇正確的品項：</div>
             <div id="selectList"></div>
         </div>
 
-        <table style="width:100%; margin-top:20px; border-collapse: collapse;">
-            <thead style="background:#f8f9fa"><tr><th style="padding:10px; text-align:left">最近寫入項目</th></tr></thead>
-            <tbody id="history"></tbody>
-        </table>
+        <div class="history-section">
+            <div class="history-title">🕒 最近操作紀錄</div>
+            <div id="historyList"></div>
+        </div>
     </div>
 
     <script>
@@ -79,11 +156,10 @@
             const selector = document.getElementById('selectorBox');
             
             if (!name) return alert("請輸入要查詢或寫入的物品名稱！");
-            // 🛡️ 精準修改：不管是查詢還是寫入，沒填授權碼就直接擋下來
             if (!pin) return alert("請輸入授權碼！");
             
-            status.innerText = "⏳ 處理中...";
-            status.className = "sync-status";
+            status.innerText = "⏳ 正在處理中...";
+            status.className = "sync-status status-empty";
             selector.style.display = "none";
 
             try {
@@ -95,34 +171,34 @@
                 const res = await response.json();
 
                 if (res.status === "duplicate") {
-                    status.innerText = "⚠️ 偵測到多筆相符項目，請從下方選擇正確寫入目標：";
-                    status.className = "sync-status warning";
+                    status.innerText = "⚠️ 發現多筆相符，請點選目標：";
+                    status.className = "sync-status status-warning";
                     showSelector(res.data, action);
                 } else if (res.status === "success") {
                     if (action === 'search') {
                         if (res.data.length === 0) {
-                            status.innerText = "❌ 查無此品號或代碼";
-                            status.className = "sync-status error";
+                            status.innerText = "❌ 查無此品號資料";
+                            status.className = "sync-status status-error";
                         } else {
-                            status.innerText = `✅ 找到 ${res.data.length} 筆資料：`;
-                            status.className = "sync-status success";
+                            status.innerText = `✅ 查詢成功 (找到 ${res.data.length} 筆)`;
+                            status.className = "sync-status status-success";
                             showSelector(res.data, 'search');
                         }
                     } else {
                         status.innerText = "✅ 寫入成功！";
-                        status.className = "sync-status success";
+                        status.className = "sync-status status-success";
                         addHistory(name, qty);
                         nameInput.value = "";
-                        qtyInput.value = "0"; // 成功後自動歸零
+                        qtyInput.value = "0"; // 成功後歸零
                         nameInput.focus();
                     }
                 } else {
                     status.innerText = "❌ " + (res.message || "發生錯誤");
-                    status.className = "sync-status error";
+                    status.className = "sync-status status-error";
                 }
             } catch (e) { 
-                status.innerText = "❌ 連線失敗，請檢查網路及 API 設定"; 
-                status.className = "sync-status error";
+                status.innerText = "❌ 連線失敗，請檢查網路"; 
+                status.className = "sync-status status-error";
             }
         }
 
@@ -130,22 +206,31 @@
             const list = document.getElementById('selectList');
             const box = document.getElementById('selectorBox');
             const title = document.getElementById('selectorTitle');
-            title.innerText = (action === 'search') ? "🔍 查詢結果清單：" : "⚠️ 偵測到重複品項，請點擊要寫入的項目：";
+            
+            title.innerText = (action === 'search') ? "🔍 查詢結果清單：" : "⚠️ 請點擊正確的品項進行寫入：";
+            
             list.innerHTML = data.map(item => `
                 <div class="select-item" onclick="${action === 'update' ? `handleAction('update', ${item.row})` : ''}">
-                    <div style="font-weight:bold; color:#0078d4">代碼: ${item.code} | ${item.partNo}</div>
-                    <div style="font-size:13px; color:#666;">${item.partName}</div>
-                    <div style="color:#e91e63">目前庫存/餘料: ${item.stock}</div>
-                    ${action === 'update' ? `<div style="font-size:12px; color:#aaa; text-align:right; margin-top:5px;">[ 點擊寫入此項 ]</div>` : ''}
+                    <div style="font-weight:700; color:var(--primary-color); font-size:15px;">${item.code} | ${item.partNo}</div>
+                    <div style="font-size:13px; color:#666; margin:4px 0;">${item.partName}</div>
+                    <div style="font-size:13px; font-weight:700; color:#e91e63">📦 目前庫存: ${item.stock}</div>
                 </div>
             `).join('');
             box.style.display = "block";
+            // 自動滾動到選擇器
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function addHistory(n, q) {
-            const h = document.getElementById('history');
-            const row = h.insertRow(0);
-            row.innerHTML = `<td style="padding:10px; border-bottom:1px solid #eee">${n} (寫入數量: ${q})</td>`;
+            const hList = document.getElementById('historyList');
+            const item = document.createElement('div');
+            item.className = 'history-row';
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            item.innerHTML = `
+                <span class="history-name">${n} <small style="color:#aaa; margin-left:5px;">${time}</small></span>
+                <span class="history-qty">+${q}</span>
+            `;
+            hList.insertBefore(item, hList.firstChild);
         }
     </script>
 </body>
